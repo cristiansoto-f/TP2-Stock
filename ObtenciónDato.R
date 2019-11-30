@@ -1,4 +1,6 @@
 #install.packages("quantmod")
+#install.packages("tidyquant")
+library(tidyquant)
 library(quantmod)
 
 #Obtención de Datos
@@ -40,8 +42,13 @@ IBOVESPA <- getSymbols("^BVSP", src="yahoo", from = "2010-01-01",
                       to = "2019-11-28", auto.assign = FALSE)
 
 #Acciones
-YPF <- getSymbols("YPFD.BA", src="yahoo", from = "2010-01-01", 
-                   to = "2019-11-28", auto.assign = FALSE)
+stockMerval = c("ALUA.BA", "BMA.BA", "BBAR.BA", "BYMA.BA", "CVH.BA", "CEPU.BA",
+                "CRES.BA", "EDN.BA", "GGAL.BA", "VALO.BA", "SUPV.BA", "HARG.BA",
+                "PAMP.BA", "COME.BA", "TECO2.BA", "TXAR.BA", "TRAN.BA", "TGNO4.BA",
+                "TGSU2.BA", "YPFD.BA") %>%
+  tq_get(get = "stock.prices", complete_cases = T)
+
+write.csv(stockMerval, "stockMerval")
 
 # Visualización de los primeros 6 datos
 head(YPF)
