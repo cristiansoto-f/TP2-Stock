@@ -2,6 +2,7 @@
 #install.packages("tidyquant")
 library(tidyquant)
 library(quantmod)
+library(ggplot2)
 
 #Obtención de Datos
 #Bolsas
@@ -50,6 +51,10 @@ stockMerval = c("ALUA.BA", "BMA.BA", "BBAR.BA", "BYMA.BA", "CVH.BA", "CEPU.BA",
 
 write.csv(stockMerval, "stockMerval")
 
-# Visualización de los primeros 6 datos
-head(YPF)
-plot(YPF)
+# Visualización Merval
+
+Merval %>%
+  ggplot(aes(x = date, y = close)) +
+  geom_line() +
+  labs(title = "Merval", y = "Puntos", x = "") + 
+  theme_tq()
