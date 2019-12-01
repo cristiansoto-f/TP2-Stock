@@ -1,0 +1,100 @@
+getSymbols("^GSPC", from="2019-01-01", to="2019-10-01", auto.assign = FALSE)
+getSymbols("GOOG", from="2019-01-01", to="2019-10-01", auto.assign = FALSE)
+getSymbols("AMZN", from="2019-01-01", to="2019-10-01", auto.assign = FALSE)
+getSymbols("MCD", from="2019-01-01", to="2019-10-01", auto.assign = FALSE)
+getSymbols("TNX")
+getSymbols("DGS3MO", src = "FRED")
+
+precios<-data.frame(GSPC$GSPC.Close,GOOG$GOOG.Close,AMZN$AMZN.Close,MCD$MCD.Close)
+names(precios)<-c("SPC500","GOOGLE","AMAZON","MACDONALDS")
+retornos<-na.omit(ROC(precios))
+
+init.portf<-portfolio.spec(assets = colnames(retornos))
+init.portf<-add.constraint(portfolio = init.portf,type = "box",min=c(0.2,0.3,0.1,0.1),max=c(0.2,0.3,2,2))
+max.portf<-add.objective(portfolio = init.portf,type = "return",name = "mean")
+opt_maxret <- optimize.portfolio(R=retornos, portfolio=max.portf,optimize_method="ROI",trace=TRUE)
+w<-opt_maxret[["weights"]]
+barplot(w)
+a<-c(mean(retornos$SPC500),mean(retornos$GOOGLE),mean(retornos$AMAZON),
+     mean(retornos$MACDONALDS))
+sd<-c(StdDev(retornos$SPC500),StdDev(retornos$GOOGLE),StdDev(retornos$AMAZON),
+      StdDev(retornos$MACDONALDS))
+g1 <- ggplot(mapping = aes(sd,a,label=c("SPC500","GOOGLE","AMAZON","MACDONALDS"))) + geom_point()
+g1 <- g1 + geom_text(hjust = 0, vjust = 0)
+g1 <- g1 + theme_bw() + xlab("Riesgo") + ylab("Retorno")
+g1 <- g1 + ggtitle("Trade-off Riesgo-Retorno",subtitle = "Cuatro activos riesgosos")
+g1
+
+rf<-na.omit(ROC(data.frame(DGS3MO$DGS3MO)))
+rf<-as.data.frame(rf)
+for (i in 1:nrow(rf)) {
+  for (i in 1:ncol(rf)) {
+    y<-rf[1,1]+rf[1+i,1]
+  }
+}
+y<-y/nrow(rf)
+sharpe.ind<-(a-y)/sd
+rp<-w%*%a
+sigma<-sqrt(w%*%cov(retornos)%*%w)
+Sharpe<-(rp-y)/sigma
+cov<-cov(retornos)
+
+###MAXIMIZACION DE PORTFOLIO###
+{efficient.portfolio <-
+  function(er, cov.mat, target.return, shorts=TRUE)
+  {
+    call <- match.call()
+    
+    #
+    # check for valid inputs
+    #
+    asset.names <- names(er)
+    er <- as.vector(er) # assign names if none exist
+    N <- length(er)
+    cov.mat <- as.matrix(cov.mat)
+    if(N != nrow(cov.mat))
+      stop("invalid inputs")
+    if(any(diag(chol(cov.mat)) <= 0))
+      stop("Covariance matrix not positive definite")
+    # remark: could use generalized inverse if cov.mat is positive semidefinite
+    
+    #
+    # compute efficient portfolio
+    #
+    if(shorts==TRUE){
+      ones <- rep(1, N)
+      top <- cbind(2*cov.mat, er, ones)
+      bot <- cbind(rbind(er, ones), matrix(0,2,2))
+      A <- rbind(top, bot)
+      b.target <- as.matrix(c(rep(0, N), target.return, 1))
+      x <- solve(A, b.target)
+      w <- x[1:N]
+    } else if(shorts==FALSE){
+      Dmat <- 2*cov.mat
+      dvec <- rep.int(0, N)
+      Amat <- cbind(rep(1,N), er, diag(1,N))
+      bvec <- c(1, target.return, rep(0,N))
+      result <- quadprog::solve.QP(Dmat=Dmat,dvec=dvec,Amat=Amat,bvec=bvec,meq=2)
+      w <- round(result$solution, 6)
+    } else {
+      stop("shorts needs to be logical. For no-shorts, shorts=FALSE.")
+    }
+    
+    #
+    # compute portfolio expected returns and variance
+    #
+    names(w) <- asset.names
+    er.port <- crossprod(er,w)
+    sd.port <- sqrt(w %*% cov.mat %*% w)
+    ans <- list("call" = call,
+                "er" = as.vector(er.port),
+                "sd" = as.vector(sd.port),
+                "weights" = w) 
+    class(ans) <- "portfolio"
+    return(ans)
+  }
+}
+#############
+eficiente<-efficient.portfolio(a,cov,rp,shorts = F)
+sharpe.efficiente<-eficiente[["er"]]-y/eficiente[["sd"]]
+barplot(eficiente$weights)
