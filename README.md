@@ -1,6 +1,13 @@
 # TP2-Stock
 Trabajo práctico 2 - Computación 
 # Últimos cambios
+    02/12 Agregadas variables fecha.comienzo y fecha.fin para definir las fechas desde donde se obtendran los datos.
+          Agregadas funciones para graficar: 
+            Para hacer una comparación entre dos mercados conviene que estos esten en la misma moneda, es por eso que 
+            se deben obtener los tipo de cambio, ej usd_ars = c("USDARS=X") (Yahoo finance)
+            Luego se debe utilizar la funcion delete_na_values para eliminar los valores nulos.
+            Finalmente la funcion actualizar_precios para obtener los adjusted prices de la acción/indice en un tipo de cambio.
+            Luego se pueden graficar los precios y los rendimientos mensuales mediante graficar_precios y      graph_index_returns_monthly
     30/11 Obtención de datos completa
 # Información
     ■ Se puede obtener información sobre las acciones en Yahoo Finance.
