@@ -1,11 +1,13 @@
 #install.packages("quantmod")
 #install.packages("tidyquant")
 #install.packages("tidyverse")
+#install.packages("plotly")
 library(tidyquant)
 library(tidyverse)
 library(quantmod)
 library(dplyr)
 library(ggplot2)
+library(plotly)
 
 fecha.comienzo = "2014-01-01"
 fecha.fin = "2019-12-01"
@@ -14,7 +16,7 @@ fecha.fin = "2019-12-01"
 
 delete_na_values = function(c_exchglist)
 {
-  if(is_tibble(index) && is_tibble(c_exchglist))
+  if(is_tibble(c_exchglist))
   {
   
   c_exchglist <- c_exchglist %>%
@@ -24,7 +26,6 @@ delete_na_values = function(c_exchglist)
   }
   else return("Parámetros mal ingresados")
 }
-usd_ars2 = delete_na_values(Merval, usd_ars)
 
 actualizar_precios = function(index, c_exchglist)
 {
@@ -42,7 +43,6 @@ actualizar_precios = function(index, c_exchglist)
     else
       index[i, "adjusted"] = index[i, "adjusted"]/exchange_rate
   }
-  print(index)
 }
 
 graficar_precios = function(index, title, y, x)
@@ -64,20 +64,18 @@ graph_index_returns_monthly <- function(index, title, y, x)
                period     = "monthly", 
                col_rename = "returns")
   
-  index_returns_monthly %>%
+  p = index_returns_monthly %>%
     ggplot(aes(x = date, y = index_returns_monthly$returns)) +
-    geom_line() +
-    labs(title = title, y = y, x = x) + 
+    #geom_line(color="steelblue") +
+    geom_area(color="steelblue") +
+    #geom_point() +
+    labs(title = title, y = y, x = x, caption="Source: YahooFinance", subtitle = "Hola") + 
     theme_tq()
-  
+  ggplotly(p)
 }
 ####FIN FUNCIONES####
 ####Recopilación de Datos####
-Merval = actualizar_precios(Merval, usd_ars2)
-usd_ars <- usd_ars %>%
-  mutate(adjusted = replace(adjusted,
-                            is.na(adjusted),
-                            0))
+
 #####.Bolsas#####
 Merval <- c("^MERV") %>%
   tq_get(get = "stock.prices",
@@ -170,8 +168,13 @@ usd_ars = c("USDARS=X") %>%
          from = fecha.comienzo,
          to = fecha.fin,
          complete_cases = T)
+usd_ars = delete_na_values(usd_ars)
 
 #####Graficos####
 #Grafico del merval en dolares
+
+Merval = actualizar_precios(Merval, usd_ars)
 graficar_precios(Merval, "Merval en Dólares", "Puntos", "")
 graph_index_returns_monthly(Merval, "Merval", "Retornos", "")
+
+graph_index_returns_monthly(SP500, "S&P", "Retornos", "")
