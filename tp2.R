@@ -32,10 +32,9 @@ actualizar_precios = function(index, c_exchglist)
   
   for (i in 1:nrow(index))
   {
-    date = index[i, "date"]
     exchange_rate = c_exchglist %>%
-      select(adjusted) %>%
-      filter(c_exchglist$date == date)
+    select(adjusted) %>%
+    filter(as.Date(c_exchglist$date) == as.Date(index$date[i]))
     if(as.numeric(exchange_rate) == 0)
     {
       index[i, "adjusted"] = NA
@@ -43,6 +42,7 @@ actualizar_precios = function(index, c_exchglist)
     else
       index[i, "adjusted"] = index[i, "adjusted"]/exchange_rate
   }
+  return(index)
 }
 
 graficar_precios = function(index, title, y, x)
@@ -173,7 +173,7 @@ usd_ars = delete_na_values(usd_ars)
 #####Graficos####
 #Grafico del merval en dolares
 
-Merval = actualizar_precios(Merval, usd_ars)
+Merval <- actualizar_precios(Merval, usd_ars)
 graficar_precios(Merval, "Merval en Dólares", "Puntos", "")
 graph_index_returns_monthly(Merval, "Merval", "Retornos", "")
 
