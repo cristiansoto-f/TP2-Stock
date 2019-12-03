@@ -178,3 +178,11 @@ graficar_precios(Merval, "Merval en Dólares", "Puntos", "")
 graph_index_returns_monthly(Merval, "Merval", "Retornos", "")
 
 graph_index_returns_monthly(SP500, "S&P", "Retornos", "")
+###.Graficos de densidad###
+sp500_returns_monthly <- SP500 %>%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = "monthly", 
+               col_rename = "returns")
+
+  ggplot(sp500_returns_monthly, aes(x=returns, fill = "SP500")) + geom_density(alpha = 0.3)
