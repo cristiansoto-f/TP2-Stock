@@ -184,5 +184,22 @@ sp500_returns_monthly <- SP500 %>%
                mutate_fun = periodReturn, 
                period     = "monthly", 
                col_rename = "returns")
+sp500_returns_monthly <- mutate(sp500_returns_monthly, symbol = "S&P 500")
 
-  ggplot(sp500_returns_monthly, aes(x=returns, fill = "SP500")) + geom_density(alpha = 0.3)
+merval_returns_monthly <- Merval %>%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = "monthly", 
+               col_rename = "returns")
+merval_returns_monthly <- mutate(merval_returns_monthly, symbol = "Merval")
+markets.returns <- rbind(merval_returns_monthly, sp500_returns_monthly) 
+
+markets.returns %>% 
+  ggplot(aes(x = returns, fill = symbol)) + geom_density(alpha = 0.3)
+
+p = markets.returns %>%
+    ggplot(aes(x = returns, fill = symbol)) +
+      xlim(c(-0.4, 0.3)) +
+      #ylim(c(0,15)) +
+      geom_density(alpha = 0.3)
+ggplotly(p)
