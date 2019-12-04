@@ -18,11 +18,11 @@ delete_na_values = function(c_exchglist)
 {
   if(is_tibble(c_exchglist))
   {
-  
-  c_exchglist <- c_exchglist %>%
-    mutate(adjusted = replace(adjusted,
-                              is.na(adjusted),
-                              0))
+    
+    c_exchglist <- c_exchglist %>%
+      mutate(adjusted = replace(adjusted,
+                                is.na(adjusted),
+                                0))
   }
   else return("Parámetros mal ingresados")
 }
@@ -33,8 +33,8 @@ actualizar_precios = function(index, c_exchglist)
   for (i in 1:nrow(index))
   {
     exchange_rate = c_exchglist %>%
-    select(adjusted) %>%
-    filter(as.Date(c_exchglist$date) == as.Date(index$date[i]))
+      select(adjusted) %>%
+      filter(as.Date(c_exchglist$date) == as.Date(index$date[i]))
     if(as.numeric(exchange_rate) == 0)
     {
       index[i, "adjusted"] = NA
@@ -59,10 +59,10 @@ graficar_precios = function(index, title, y, x)
 graph_index_returns_monthly <- function(index, title, y, x)
 {
   index_returns_monthly <- index %>%
-  tq_transmute(select     = adjusted, 
-               mutate_fun = periodReturn, 
-               period     = "monthly", 
-               col_rename = "returns")
+    tq_transmute(select     = adjusted, 
+                 mutate_fun = periodReturn, 
+                 period     = "monthly", 
+                 col_rename = "returns")
   
   p = index_returns_monthly %>%
     ggplot(aes(x = date, y = index_returns_monthly$returns)) +
@@ -71,6 +71,18 @@ graph_index_returns_monthly <- function(index, title, y, x)
     #geom_point() +
     labs(title = title, y = y, x = x, caption="Source: YahooFinance", subtitle = "Hola") + 
     theme_tq()
+  ggplotly(p)
+}
+
+graph_density_returns = function(index1, index2, title, x, y)
+{
+  markets.returns <- rbind(index1, index2)
+  p = markets.returns %>%
+    ggplot(aes(x = returns, fill = symbol)) +
+    labs(title = title, x = x, y = y) +
+    #xlim(c(-0.4, 0.3)) +
+    #ylim(c(0,15)) +
+    geom_density(alpha = 0.3)
   ggplotly(p)
 }
 ####FIN FUNCIONES####
@@ -177,7 +189,7 @@ Merval <- actualizar_precios(Merval, usd_ars)
 graficar_precios(Merval, "Merval en Dólares", "Puntos", "")
 graph_index_returns_monthly(Merval, "Merval", "Retornos", "")
 
-graph_index_returns_monthly(SP500, "S&P", "Retornos", "")
+graph_index_returns_monthly(SP500, "S&P", "Retornos", "Tiempo")
 ###.Graficos de densidad###
 sp500_returns_monthly <- SP500 %>%
   tq_transmute(select     = adjusted, 
@@ -192,14 +204,6 @@ merval_returns_monthly <- Merval %>%
                period     = "monthly", 
                col_rename = "returns")
 merval_returns_monthly <- mutate(merval_returns_monthly, symbol = "Merval")
-markets.returns <- rbind(merval_returns_monthly, sp500_returns_monthly) 
 
-markets.returns %>% 
-  ggplot(aes(x = returns, fill = symbol)) + geom_density(alpha = 0.3)
-
-p = markets.returns %>%
-    ggplot(aes(x = returns, fill = symbol)) +
-      xlim(c(-0.4, 0.3)) +
-      #ylim(c(0,15)) +
-      geom_density(alpha = 0.3)
-ggplotly(p)
+graph_density_returns(merval_returns_monthly, sp500_returns_monthly, "Distribución de retornos mensuales", 
+                      "Retornos", "Densidad")
