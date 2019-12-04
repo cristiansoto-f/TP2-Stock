@@ -1,6 +1,7 @@
 # TP2-Stock
 Trabajo práctico 2 - Computación 
 # Últimos cambios
+    04/12 Agregada funcion graph_density_returns que muestra la densidad de los retornos de 2 indices.
     02/12 Agregadas variables fecha.comienzo y fecha.fin para definir las fechas desde donde se obtendran los datos.
           Agregadas funciones para graficar: 
             Para hacer una comparación entre dos mercados conviene que estos esten en la misma moneda, es por eso que 
