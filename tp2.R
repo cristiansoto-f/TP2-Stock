@@ -205,5 +205,12 @@ merval_returns_monthly <- Merval %>%
                col_rename = "returns")
 merval_returns_monthly <- mutate(merval_returns_monthly, symbol = "Merval")
 
-graph_density_returns(rbind(merval_returns_monthly, sp500_returns_monthly), "Distribución de retornos mensuales", 
+nikkei_returns_monthly <- Nikkei225 %>%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = "monthly", 
+               col_rename = "returns")
+nikkei_returns_monthly <- mutate(nikkei_returns_monthly, symbol = "Nikkei")
+
+graph_density_returns(rbind(sp500_returns_monthly,nikkei_returns_monthly,merval_returns_monthly), "Distribución de retornos mensuales", 
                       "Retornos", "Densidad")
