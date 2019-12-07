@@ -9,7 +9,7 @@ library(dplyr)
 library(ggplot2)
 library(plotly)
 
-fecha.comienzo = "2014-01-01"
+fecha.comienzo = "2009-12-01"
 fecha.fin = "2019-12-01"
 
 #####FUNCIONES####
@@ -214,3 +214,10 @@ nikkei_returns_monthly <- mutate(nikkei_returns_monthly, symbol = "Nikkei")
 
 graph_density_returns(rbind(sp500_returns_monthly,nikkei_returns_monthly,merval_returns_monthly), "Distribución de retornos mensuales", 
                       "Retornos", "Densidad")
+## Modelado
+## Idea: Retorno diario del Merval en función de los retornos del día anterior de los otros índices.
+merval_returns_daily <- Merval %>%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = "daily", 
+               col_rename = "returns")
