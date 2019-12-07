@@ -221,3 +221,5 @@ merval_returns_daily <- Merval %>%
                mutate_fun = periodReturn, 
                period     = "daily", 
                col_rename = "returns")
+merval_returns_daily <- mutate(merval_returns_daily, symbol = "Merval")
+
