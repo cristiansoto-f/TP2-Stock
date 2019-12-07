@@ -74,9 +74,9 @@ graph_index_returns_monthly <- function(index, title, y, x)
   ggplotly(p)
 }
 
-graph_density_returns = function(index1, index2, title, x, y)
+graph_density_returns = function(indexframe, title, x, y)
 {
-  markets.returns <- rbind(index1, index2)
+  markets.returns <- indexframe
   p = markets.returns %>%
     ggplot(aes(x = returns, fill = symbol)) +
     labs(title = title, x = x, y = y) +
@@ -205,5 +205,5 @@ merval_returns_monthly <- Merval %>%
                col_rename = "returns")
 merval_returns_monthly <- mutate(merval_returns_monthly, symbol = "Merval")
 
-graph_density_returns(merval_returns_monthly, sp500_returns_monthly, "Distribución de retornos mensuales", 
+graph_density_returns(rbind(merval_returns_monthly, sp500_returns_monthly), "Distribución de retornos mensuales", 
                       "Retornos", "Densidad")
