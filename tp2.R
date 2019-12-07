@@ -85,6 +85,14 @@ graph_density_returns = function(indexframe, title, x, y)
     geom_density(alpha = 0.3)
   ggplotly(p)
 }
+
+periodic_returns <- function(index, period) {
+  return (index %>%
+    tq_transmute(select     = adjusted, 
+                 mutate_fun = periodReturn, 
+                 period     = period, 
+                 col_rename = "returns"))
+}
 ####FIN FUNCIONES####
 ####Recopilación de Datos####
 
@@ -191,35 +199,19 @@ graph_index_returns_monthly(Merval, "Merval", "Retornos", "")
 
 graph_index_returns_monthly(SP500, "S&P", "Retornos", "Tiempo")
 ###.Graficos de densidad###
-sp500_returns_monthly <- SP500 %>%
-  tq_transmute(select     = adjusted, 
-               mutate_fun = periodReturn, 
-               period     = "monthly", 
-               col_rename = "returns")
+sp500_returns_monthly <- periodic_returns(SP500, "monthly")
 sp500_returns_monthly <- mutate(sp500_returns_monthly, symbol = "S&P 500")
 
-merval_returns_monthly <- Merval %>%
-  tq_transmute(select     = adjusted, 
-               mutate_fun = periodReturn, 
-               period     = "monthly", 
-               col_rename = "returns")
+merval_returns_monthly <- periodic_returns(Merval, "monthly")
 merval_returns_monthly <- mutate(merval_returns_monthly, symbol = "Merval")
 
-nikkei_returns_monthly <- Nikkei225 %>%
-  tq_transmute(select     = adjusted, 
-               mutate_fun = periodReturn, 
-               period     = "monthly", 
-               col_rename = "returns")
+nikkei_returns_monthly <- periodic_returns(Nikkei225, "monthly")
 nikkei_returns_monthly <- mutate(nikkei_returns_monthly, symbol = "Nikkei")
 
 graph_density_returns(rbind(sp500_returns_monthly,nikkei_returns_monthly,merval_returns_monthly), "Distribución de retornos mensuales", 
                       "Retornos", "Densidad")
 ## Modelado
 ## Idea: Retorno diario del Merval en función de los retornos del día anterior de los otros índices.
-merval_returns_daily <- Merval %>%
-  tq_transmute(select     = adjusted, 
-               mutate_fun = periodReturn, 
-               period     = "daily", 
-               col_rename = "returns")
+merval_returns_daily <- periodic_returns(Merval, "daily")
 merval_returns_daily <- mutate(merval_returns_daily, symbol = "Merval")
 
