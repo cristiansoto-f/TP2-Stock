@@ -164,6 +164,12 @@ IBOVESPA <- c("^BVSP") %>%
          from = fecha.comienzo,
          to = fecha.fin,
          complete_cases = T)
+#DOWJONES
+DOWJONES <- c("^DJI") %>%
+  tq_get(get = "stock.prices",
+         from = fecha.comienzo,
+         to = fecha.fin,
+         complete_cases = T)
 
 #####.Acciones#####
 stockMerval = c("ALUA.BA", "BMA.BA", "BBAR.BA", "BYMA.BA", "CVH.BA", "CEPU.BA",
