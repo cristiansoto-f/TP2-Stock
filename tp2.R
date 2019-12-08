@@ -9,6 +9,7 @@ library(dplyr)
 library(ggplot2)
 library(plotly)
 library(chron)
+library(caret)
 
 fecha.comienzo = "2009-12-01"
 fecha.fin = "2019-12-01"
@@ -245,3 +246,14 @@ for(i in 1:nrow(dataConsolidada)){
 }
 
 dataConsolidada <- dataConsolidada[-c(1,2),]
+dataConsolidada <- filter(dataConsolidada, !is.na(sp500))
+dataConsolidada$sp500 <- unlist(dataConsolidada$sp500)
+
+set.seed(6)
+trainIndex=createDataPartition(dataConsolidada$merval, p=0.75)$Resample1
+
+d_merval_train=dataConsolidada[trainIndex, ]
+d_merval_test= dataConsolidada[-trainIndex, ]
+
+lm<- lm(merval ~ sp500, data = d_merval_train)
+summary(lm)
