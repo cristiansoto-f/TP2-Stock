@@ -8,6 +8,7 @@ library(quantmod)
 library(dplyr)
 library(ggplot2)
 library(plotly)
+library(chron)
 
 fecha.comienzo = "2009-12-01"
 fecha.fin = "2019-12-01"
@@ -219,5 +220,28 @@ graph_density_returns(rbind(sp500_returns_monthly,nikkei_returns_monthly,merval_
 ## Modelado
 ## Idea: Retorno diario del Merval en función de los retornos del día anterior de los otros índices.
 merval_returns_daily <- periodic_returns(Merval, "daily")
-merval_returns_daily <- mutate(merval_returns_daily, symbol = "Merval")
+sp500_returns_daily <- periodic_returns(SP500, "daily")
 
+dataConsolidada <- data.frame(merval_returns_daily)
+colnames(dataConsolidada)[2] <- "merval" 
+
+for(i in 1:nrow(dataConsolidada)){
+  if (wday(dataConsolidada$date[i]) == 2) {
+    #Si el día es lunes, se obtienen los datos del viernes.
+    if (length(filter(sp500_returns_daily, (dataConsolidada$date[i]-3) == date)$returns) !=0){
+      
+      dataConsolidada$sp500[i] <- select(filter(sp500_returns_daily, (dataConsolidada$date[i]-3) == sp500_returns_daily$date), returns)
+    
+      } else {dataConsolidada$sp500[i] <- NA}
+  
+  } else {
+    
+    if (length(filter(sp500_returns_daily, (dataConsolidada$date[i]-1) == date)$returns) != 0){
+      
+      dataConsolidada$sp500[i] <- select(filter(sp500_returns_daily, (dataConsolidada$date[i]-1) == sp500_returns_daily$date), returns)
+    
+      } else {dataConsolidada$sp500[i] <- NA}
+  }
+}
+
+dataConsolidada <- dataConsolidada[-c(1,2),]
