@@ -10,6 +10,7 @@ library(ggplot2)
 library(plotly)
 library(chron)
 library(caret)
+library(e1071)
 
 fecha.comienzo = "2009-12-01"
 fecha.fin = "2019-12-01"
@@ -95,83 +96,49 @@ periodic_returns <- function(index, period) {
                  period     = period, 
                  col_rename = "returns"))
 }
+
+ticker_history <- function(ticker, start, end) {
+  ticker %>%
+    tq_get(get = "stock.prices",
+           from = start,
+           to = end,
+           complete_cases = T)
+}
 ####FIN FUNCIONES####
 ####Recopilación de Datos####
 
 #####.Bolsas#####
-Merval <- c("^MERV") %>%
-  tq_get(get = "stock.prices",
-         from = fecha.comienzo,
-         to = fecha.fin,
-         complete_cases = T)
+Merval <- ticker_history("^MERV", fecha.comienzo, fecha.fin)
+
 #EEUU
-SP500 <-  c("^GSPC") %>%
-  tq_get(get = "stock.prices",
-         from = fecha.comienzo,
-         to = fecha.fin,
-         complete_cases = T)
+SP500 <-  ticker_history("^GSPC", fecha.comienzo, fecha.fin)
 
 #JapÃ³n
-Nikkei225 <- c("^N225") %>%
-  tq_get(get = "stock.prices",
-         from = fecha.comienzo,
-         to = fecha.fin,
-         complete_cases = T)
+Nikkei225 <- ticker_history("^N225", fecha.comienzo, fecha.fin)
 
 #UK
-FTSE100 <- c("^FTSE") %>%
-  tq_get(get = "stock.prices",
-         from = fecha.comienzo,
-         to = fecha.fin,
-         complete_cases = T)
+FTSE100 <- ticker_history("^FTSE", fecha.comienzo, fecha.fin)
 
 #Alemania
-DAX <- c("^GDAXI") %>%
-  tq_get(get = "stock.prices",
-         from = fecha.comienzo,
-         to = fecha.fin,
-         complete_cases = T)
+DAX <- ticker_history("^GDAXI", fecha.comienzo, fecha.fin)
 
 #España
-IBEX35 <- c("^IBEX") %>%
-  tq_get(get = "stock.prices",
-         from = fecha.comienzo,
-         to = fecha.fin,
-         complete_cases = T)
+IBEX35 <- ticker_history("^IBEX", fecha.comienzo, fecha.fin)
 
 #China
-SHANGAI <- c("000001.SS") %>%
-  tq_get(get = "stock.prices",
-         from = fecha.comienzo,
-         to = fecha.fin,
-         complete_cases = T)
+SHANGAI <- ticker_history("000001.SS", fecha.comienzo, fecha.fin)
 
 #Mexico
-IPCMEX <- c("^MXX") %>%
-  tq_get(get = "stock.prices",
-         from = fecha.comienzo,
-         to = fecha.fin,
-         complete_cases = T)
+IPCMEX <- ticker_history("^MXX", fecha.comienzo, fecha.fin)
 
 #India
-SENSEX <- c("^BSESN") %>%
-  tq_get(get = "stock.prices",
-         from = fecha.comienzo,
-         to = fecha.fin,
-         complete_cases = T)
+SENSEX <- ticker_history("^BSESN", fecha.comienzo, fecha.fin)
 
 #Brasil
-IBOVESPA <- c("^BVSP") %>%
-  tq_get(get = "stock.prices",
-         from = fecha.comienzo,
-         to = fecha.fin,
-         complete_cases = T)
+IBOVESPA <- ticker_history("^BVSP", fecha.comienzo, fecha.fin)
+
 #DOWJONES
-DOWJONES <- c("^DJI") %>%
-  tq_get(get = "stock.prices",
-         from = fecha.comienzo,
-         to = fecha.fin,
-         complete_cases = T)
+DOWJONES <- ticker_history("^DJI", fecha.comienzo, fecha.fin)
 
 #####.Acciones#####
 stockMerval = c("ALUA.BA", "BMA.BA", "BBAR.BA", "BYMA.BA", "CVH.BA", "CEPU.BA",
@@ -191,11 +158,7 @@ stockMerval = c("ALUA.BA", "BMA.BA", "BBAR.BA", "BYMA.BA", "CVH.BA", "CEPU.BA",
 #write.csv(Merval, "")
 
 #####.Exchange rates#####
-usd_ars = c("USDARS=X") %>%
-  tq_get(get = "stock.prices",
-         from = fecha.comienzo,
-         to = fecha.fin,
-         complete_cases = T)
+usd_ars = ticker_history("USDARS=X", fecha.comienzo, fecha.fin)
 usd_ars = delete_na_values(usd_ars)
 
 #####Graficos####
@@ -255,5 +218,7 @@ trainIndex=createDataPartition(dataConsolidada$merval, p=0.75)$Resample1
 d_merval_train=dataConsolidada[trainIndex, ]
 d_merval_test= dataConsolidada[-trainIndex, ]
 
-lm<- lm(merval ~ sp500, data = d_merval_train)
+lm<- lm(merval ~ sp500 - 1, data = d_merval_train)
 summary(lm)
+
+
