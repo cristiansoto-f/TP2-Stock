@@ -154,7 +154,7 @@ DAX <- ticker_history("^GDAXI", fecha.comienzo, fecha.fin)
 IBEX35 <- ticker_history("^IBEX", fecha.comienzo, fecha.fin)
 
 #China
-SHANGAI <- ticker_history("000001.SS", fecha.comienzo, fecha.fin)
+SHANGHAI <- ticker_history("000001.SS", fecha.comienzo, fecha.fin)
 
 #Mexico
 IPCMEX <- ticker_history("^MXX", fecha.comienzo, fecha.fin)
