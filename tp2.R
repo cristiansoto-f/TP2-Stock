@@ -231,9 +231,10 @@ trainIndex=createDataPartition(dataConsolidada$merval, p=0.75)$Resample1
 d_merval_train=dataConsolidada[trainIndex, ]
 d_merval_test= dataConsolidada[-trainIndex, ]
 
-lm<- lm(merval ~ sp500 - 1, data = d_merval_train)
-summary(lm)
-
-
+modelo<- lm(merval ~ sp500 - 1, data = d_merval_train)
+summary(modelo)
+d_merval_test$pred<-predict(modelo, d_merval_test, type= "response")
+plot(d_merval_test$merval, col="blue")
+points(d_merval_test$pred,col = "red")
 
 
