@@ -181,6 +181,19 @@ nikkei_returns_monthly <- mutate(nikkei_returns_monthly, symbol = "Nikkei")
 
 graph_density_returns(rbind(sp500_returns_monthly,nikkei_returns_monthly,merval_returns_monthly), "Distribución de retornos mensuales", 
                       "Retornos", "Densidad")
+ohlc=Merval[,"adjusted"]
+ohlc=na.omit(ohlc)
+v1=volatility(ohlc,calc = "close")
+ohlc2=SP500[,c("open","high","low","close")]
+ohlc2=na.omit(ohlc2)
+v2=volatility(ohlc2,calc = "close")
+volatilidades=data.frame(tail(v1),tail(v2))
+names(volatilidades)=c("Vol.Merval","Vol.SP500")
+View(volatilidades)
+Retornos=data.frame(tail(ROC(ohlc)),tail(ROC(ohlc2)))
+names(Retornos)=c("Ret.Merval","Ret.SP500")
+
+
 ## Modelado
 ## Idea: Retorno diario del Merval en función de los retornos del día anterior de los otros índices.
 merval_returns_daily <- periodic_returns(Merval, "daily")
@@ -220,5 +233,7 @@ d_merval_test= dataConsolidada[-trainIndex, ]
 
 lm<- lm(merval ~ sp500 - 1, data = d_merval_train)
 summary(lm)
+
+
 
 
