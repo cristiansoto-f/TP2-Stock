@@ -104,6 +104,34 @@ ticker_history <- function(ticker, start, end) {
            to = end,
            complete_cases = T)
 }
+
+dataMatch <- function(baseIndexReturns, matchingIndexReturns, baseIndexName, matchingIndexName){
+  dataConsolidada <- data.frame(baseIndexReturns)
+  colnames(dataConsolidada)[2] <- baseIndexName 
+  for(i in 1:nrow(dataConsolidada)){
+    if (wday(dataConsolidada$date[i]) == 2) {
+      #Si el día es lunes, se obtienen los datos del viernes.
+      if (length(filter(matchingIndexReturns, (dataConsolidada$date[i]-3) == date)$returns) !=0){
+        
+        dataConsolidada$index2[i] <- select(filter(matchingIndexReturns, (dataConsolidada$date[i]-3) == date), returns)
+        
+      } else {dataConsolidada$index2[i] <- NA}
+      
+    } else {
+      
+      if (length(filter(matchingIndexReturns, (dataConsolidada$date[i]-1) == date)$returns) != 0){
+        
+        dataConsolidada$index2[i] <- select(filter(matchingIndexReturns, (dataConsolidada$date[i]-1) == date), returns)
+        
+      } else {dataConsolidada$index2[i] <- NA}
+    }
+  }
+  
+  dataConsolidada <- filter(dataConsolidada, !is.na(index2))
+  dataConsolidada$index2 <- unlist(dataConsolidada$index2)
+  colnames(dataConsolidada)[ncol(dataConsolidada)] <- matchingIndexName
+  return(dataConsolidada)
+}
 ####FIN FUNCIONES####
 ####Recopilación de Datos####
 
@@ -199,31 +227,8 @@ names(Retornos)=c("Ret.Merval","Ret.SP500")
 merval_returns_daily <- periodic_returns(Merval, "daily")
 sp500_returns_daily <- periodic_returns(SP500, "daily")
 
-dataConsolidada <- data.frame(merval_returns_daily)
-colnames(dataConsolidada)[2] <- "merval" 
-
-for(i in 1:nrow(dataConsolidada)){
-  if (wday(dataConsolidada$date[i]) == 2) {
-    #Si el día es lunes, se obtienen los datos del viernes.
-    if (length(filter(sp500_returns_daily, (dataConsolidada$date[i]-3) == date)$returns) !=0){
-      
-      dataConsolidada$sp500[i] <- select(filter(sp500_returns_daily, (dataConsolidada$date[i]-3) == sp500_returns_daily$date), returns)
-    
-      } else {dataConsolidada$sp500[i] <- NA}
-  
-  } else {
-    
-    if (length(filter(sp500_returns_daily, (dataConsolidada$date[i]-1) == date)$returns) != 0){
-      
-      dataConsolidada$sp500[i] <- select(filter(sp500_returns_daily, (dataConsolidada$date[i]-1) == sp500_returns_daily$date), returns)
-    
-      } else {dataConsolidada$sp500[i] <- NA}
-  }
-}
-
+dataConsolidada <- dataMatch(merval_returns_daily, sp500_returns_daily, "merval", "sp500")
 dataConsolidada <- dataConsolidada[-c(1,2),]
-dataConsolidada <- filter(dataConsolidada, !is.na(sp500))
-dataConsolidada$sp500 <- unlist(dataConsolidada$sp500)
 
 set.seed(6)
 trainIndex=createDataPartition(dataConsolidada$merval, p=0.75)$Resample1
@@ -231,10 +236,8 @@ trainIndex=createDataPartition(dataConsolidada$merval, p=0.75)$Resample1
 d_merval_train=dataConsolidada[trainIndex, ]
 d_merval_test= dataConsolidada[-trainIndex, ]
 
-modelo<- lm(merval ~ sp500 - 1, data = d_merval_train)
+modelo<- lm(merval ~ sp500, data = d_merval_train)
 summary(modelo)
 d_merval_test$pred<-predict(modelo, d_merval_test, type= "response")
 plot(d_merval_test$merval, col="blue")
 points(d_merval_test$pred,col = "red")
-
-
