@@ -304,3 +304,34 @@ chart.EfficientFrontier(ef,
                         RAR.text = "SR", rf = 0, tangent.line = TRUE, cex.legend = 0.8,
                         chart.assets = TRUE, labels.assets = TRUE, pch.assets = 21,
                         cex.assets = 0.8)
+
+
+
+getSymbols("NFLX", from='2009-01-03', periodicity = 'daily', auto.assign=FALSE)
+getSymbols("GOOG", from='2009-01-03', periodicity = 'daily', auto.assign=FALSE)
+getSymbols("MCD", from='2009-01-03', periodicity = 'daily', auto.assign=FALSE)
+precios<-data.frame(NFLX$NFLX.Close,GOOG$GOOG.Close,MCD$MCD.Close)
+names(precios)<-c("NETFLIX","GOOGLE","MACDONALDS")
+retornos<-na.omit(ROC(precios))
+portf2 <- portfolio.spec(colnames(retornos))
+
+portf2 <- add.constraint(portf2, type="weight_sum", min_sum=1, max_sum=1)
+portf2 <- add.constraint(portf2, type="box", min=0, max=.50)
+portf2 <- add.objective(portf2, type="return", name="mean")
+portf2 <- add.objective(portf2, type="risk", name="StdDev")
+optPort2 <- optimize.portfolio(retornos, portf2, optimize_method = "ROI", trace=TRUE)
+
+ef2 <- extractEfficientFrontier(optPort2, match.col = "StdDev", n.portfolios = 25,
+                               risk_aversion = NULL)
+
+chart.EfficientFrontier(ef2,
+                        match.col = "StdDev", n.portfolios = 25, xlim = NULL, ylim = NULL,
+                        cex.axis = 0.8, element.color = "darkgray", main = "Efficient Frontier",
+                        RAR.text = "SR", rf = 0, tangent.line = TRUE, cex.legend = 0.8,
+                        chart.assets = TRUE, labels.assets = TRUE, pch.assets = 21,
+                        cex.assets = 0.8)
+rendimientos<-c(optPort$objective_measures$mean,optPort2$objective_measures$mean)
+desvios<-c(optPort$objective_measures$StdDev,optPort2$objective_measures$StdDev)
+sharpe<-c((rendimientos[1]-0)/desvios[1],(rendimientos[2]-0)/desvios[2])
+tabla<-cbind(rendimientos,desvios,sharpe)
+rownames(tabla)<-c("merval","cartera")
