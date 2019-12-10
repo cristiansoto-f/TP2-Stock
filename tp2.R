@@ -190,6 +190,9 @@ stockMerval = c("ALUA.BA", "BMA.BA", "BBAR.BA", "BYMA.BA", "CVH.BA", "CEPU.BA",
 usd_ars = ticker_history("USDARS=X", fecha.comienzo, fecha.fin)
 usd_ars = delete_na_values(usd_ars)
 
+usd_jpy = ticker_history("USDJPY=X", fecha.comienzo, fecha.fin)
+usd_jpy = delete_na_values(usd_jpy)
+
 #####Graficos####
 #Grafico del merval en dolares
 
@@ -198,6 +201,12 @@ graficar_precios(Merval, "Merval en Dólares", "Puntos", "")
 graph_index_returns_monthly(Merval, "Merval", "Retornos", "")
 
 graph_index_returns_monthly(SP500, "S&P", "Retornos", "Tiempo")
+
+#Graficos nikkei
+Nikkei225 <- actualizar_precios(Nikkei225, usd_jpy)
+graficar_precios(Nikkei225, "Nikkei225 en dólares", "Puntos", "")
+graph_index_returns_monthly(Nikkei225, "Nikkei225", "Retornos", "")
+
 ###.Graficos de densidad###
 sp500_returns_monthly <- periodic_returns(SP500, "monthly")
 sp500_returns_monthly <- mutate(sp500_returns_monthly, symbol = "S&P 500")
