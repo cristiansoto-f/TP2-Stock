@@ -64,15 +64,16 @@ graph_index_returns_monthly <- function(index, title, y, x)
   index_returns_monthly <- index %>%
     tq_transmute(select     = adjusted, 
                  mutate_fun = periodReturn, 
-                 period     = "monthly", 
+                 period     = "monthly",
+                 type = "log",
                  col_rename = "returns")
   
   p = index_returns_monthly %>%
     ggplot(aes(x = date, y = index_returns_monthly$returns)) +
     #geom_line(color="steelblue") +
-    geom_area(color="steelblue") +
+    geom_area(fill="#4fe8c5", alpha=0.7) +
     #geom_point() +
-    labs(title = title, y = y, x = x, caption="Source: YahooFinance", subtitle = "Hola") + 
+    labs(title = title, y = y, x = x, caption="Source: YahooFinance") + 
     theme_tq()
   ggplotly(p)
 }
