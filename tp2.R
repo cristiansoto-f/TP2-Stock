@@ -307,12 +307,17 @@ chart.EfficientFrontier(ef,
 
 
 
-getSymbols("NFLX", from='2009-01-03', periodicity = 'daily', auto.assign=FALSE)
-getSymbols("GOOG", from='2009-01-03', periodicity = 'daily', auto.assign=FALSE)
-getSymbols("MCD", from='2009-01-03', periodicity = 'daily', auto.assign=FALSE)
-precios<-data.frame(NFLX$NFLX.Close,GOOG$GOOG.Close,MCD$MCD.Close)
-names(precios)<-c("NETFLIX","GOOGLE","MACDONALDS")
-retornos<-na.omit(ROC(precios))
+cartera <- c("AXP", "EBAY", "CL", "DISCK", "FB",
+             "F",  "FOXA", "GPS", "HPQ", "MSFT")
+
+portfolioPrices2 <- NULL
+for(cartera in cartera) {
+  portfolioPrices2 <- cbind(portfolioPrices2,
+                           getSymbols(cartera, from='2009-01-03', periodicity = 'daily', auto.assign=FALSE)[,4])
+}
+
+retornos <- na.omit(ROC(portfolioPrices2))
+
 portf2 <- portfolio.spec(colnames(retornos))
 
 portf2 <- add.constraint(portf2, type="weight_sum", min_sum=1, max_sum=1)
@@ -322,7 +327,7 @@ portf2 <- add.objective(portf2, type="risk", name="StdDev")
 optPort2 <- optimize.portfolio(retornos, portf2, optimize_method = "ROI", trace=TRUE)
 
 ef2 <- extractEfficientFrontier(optPort2, match.col = "StdDev", n.portfolios = 25,
-                               risk_aversion = NULL)
+                                risk_aversion = NULL)
 
 chart.EfficientFrontier(ef2,
                         match.col = "StdDev", n.portfolios = 25, xlim = NULL, ylim = NULL,
@@ -334,4 +339,5 @@ rendimientos<-c(optPort$objective_measures$mean,optPort2$objective_measures$mean
 desvios<-c(optPort$objective_measures$StdDev,optPort2$objective_measures$StdDev)
 sharpe<-c((rendimientos[1]-0)/desvios[1],(rendimientos[2]-0)/desvios[2])
 tabla<-cbind(rendimientos,desvios,sharpe)
-rownames(tabla)<-c("merval","cartera")
+rownames(tabla)<-c("merval","sp500")
+View(tabla)
